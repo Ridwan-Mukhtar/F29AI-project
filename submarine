@@ -6,7 +6,6 @@
     (:predicates
         (subLoc ?x)
         (subDestination ?d)
-        (at ?f)
     )
     
     (:action move
@@ -19,8 +18,8 @@
             )
         :effect
             (and
-                (not (at ?x))
-                (at ?d)
+                (not (subLoc ?x))
+                (subLoc ?d)
             )
     )
 )
