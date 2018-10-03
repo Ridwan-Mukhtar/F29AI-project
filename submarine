@@ -1,0 +1,26 @@
+(define (domain submarine)
+    (:requirements
+        :strips
+    )
+
+    (:predicates
+        (subLoc ?x)
+        (subDestination ?d)
+        (at ?f)
+    )
+    
+    (:action move
+        :parameters
+            (?x ?d)
+        :precondition
+            (and
+                (subLoc ?x)
+                (subDestination ?d)
+            )
+        :effect
+            (and
+                (not (at ?x))
+                (at ?d)
+            )
+    )
+)
