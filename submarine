@@ -4,22 +4,29 @@
     )
 
     (:predicates
-        (subLoc ?x)
-        (subDestination ?d)
+        (subLocation ?sL)
+        (location ?l)
+        (onBridge)
     )
     
-    (:action move
+    (:action nextArea
         :parameters
-            (?x ?d)
+            (?sL ?l)
         :precondition
             (and
-                (subLoc ?x)
-                (subDestination ?d)
+                (subLocation ?sL)
+                (location ?l)
+                (onBridge)
             )
         :effect
             (and
-                (not (subLoc ?x))
-                (subLoc ?d)
+                (when (not(onBridge))
+                          (and
+                              (onBridge)
+                          )
+                    )
+                (not (subLocation ?sL))
+                (subLocation ?l)
             )
     )
 )
