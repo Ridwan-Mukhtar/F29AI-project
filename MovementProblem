@@ -1,0 +1,19 @@
+(define (problem simpleMovement)
+  (:domain submarine)
+
+  (:objects
+      bob
+      atlantis
+  )
+
+  (:init
+      (subLoc bob)
+      (subDestination atlantis)
+  )
+
+  (:goal
+      (and
+          (at atlantis)
+      )
+  )
+)
