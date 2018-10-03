@@ -13,7 +13,7 @@
 
   (:goal
       (and
-          (at atlantis)
+          (subLoc atlantis)
       )
   )
 )
