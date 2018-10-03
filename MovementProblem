@@ -2,18 +2,26 @@
   (:domain submarine)
 
   (:objects
-      bob
-      atlantis
+      dock
+      loc1
+      loc2
+      loc3
+      loc4
+      bridge
   )
 
   (:init
-      (subLoc bob)
-      (subDestination atlantis)
+      (subLocation dock)
+      (location loc1)
+      (location loc2)
+      (location loc3)
+      (location loc4)
+      (onBridge)
   )
 
   (:goal
       (and
-          (subLoc atlantis)
+        (subLocation loc2)
       )
   )
 )
