@@ -4,23 +4,31 @@
         :typing
     )
 
-    (:types bridge captain)
+    (:types 
+        captain 
+        bridge
+    )
 
     (:predicates
         (subLocation ?sL)
         (location ?l)
-        (where ?c - captain ?r - bridge)
+        (in ?c - captain ?r - bridge)
         (onBridge)
     )
     
     (:action nextArea
         :parameters
-            (?sL ?l ?c - captain ?r - bridge)
+            (?sL ?l)
         :precondition
             (and
                 (subLocation ?sL)
                 (location ?l)
-                (where ?c ?r)
+                (exists 
+                    (?captain - captain ?bridge - bridge) 
+                        (and
+                            (in ?captain ?bridge)
+                        )
+                    )
                 (onBridge)
             )
         :effect
@@ -28,7 +36,6 @@
                 (when (not(onBridge))
                             (and
                               (onBridge)
-                              (where ?c ?r)
                           )
                     )
                 (not (subLocation ?sL))
