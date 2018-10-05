@@ -1,32 +1,39 @@
 (define (domain submarine)
     (:requirements
         :strips
+        :typing
     )
+
+    (:types bridge captain)
 
     (:predicates
         (subLocation ?sL)
         (location ?l)
+        (where ?c - captain ?r - bridge)
         (onBridge)
     )
     
     (:action nextArea
         :parameters
-            (?sL ?l)
+            (?sL ?l ?c - captain ?r - bridge)
         :precondition
             (and
                 (subLocation ?sL)
                 (location ?l)
+                (where ?c ?r)
                 (onBridge)
             )
         :effect
             (and
                 (when (not(onBridge))
-                          (and
+                            (and
                               (onBridge)
+                              (where ?c ?r)
                           )
                     )
                 (not (subLocation ?sL))
                 (subLocation ?l)
+                (location ?sL)
             )
     )
 )
