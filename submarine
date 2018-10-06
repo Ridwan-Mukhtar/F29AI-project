@@ -6,14 +6,21 @@
 
     (:types 
         captain 
+        navigator
         bridge
+        IAUV
+        MAUV
     )
 
     (:predicates
+        (artefact ?a)
         (subLocation ?sL)
         (location ?l)
-        (in ?c - captain ?r - bridge)
+        (in ?c - object ?r - bridge)
+        (at ?a ?l)
+        (deploy ?auv - IAUV ?l)
         (onBridge)
+        (picture ?a ?l)
     )
     
     (:action nextArea
@@ -24,9 +31,10 @@
                 (subLocation ?sL)
                 (location ?l)
                 (exists 
-                    (?captain - captain ?bridge - bridge) 
+                    (?captain - captain ?bridge - bridge ?navigator - navigator) 
                         (and
                             (in ?captain ?bridge)
+                            (in ?navigator ?bridge)
                         )
                     )
                 (onBridge)
@@ -41,6 +49,27 @@
                 (not (subLocation ?sL))
                 (subLocation ?l)
                 (location ?sL)
+            )
+    )
+    
+    (:action getArtefact
+        :parameters
+            (?sL ?a)
+        :precondition
+            (and
+                (subLocation ?sL)
+                (artefact ?a)
+                (at ?a ?sl)
+                (exists 
+                    (?auv - IAUV) 
+                        (and
+                            (deploy ?auv ?sl)
+                        )
+                    )
+            )
+        :effect
+            (and
+                (picture ?a ?sl)
             )
     )
 )
