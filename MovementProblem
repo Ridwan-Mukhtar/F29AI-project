@@ -9,6 +9,9 @@
       loc4
       cap - captain
       bob - bridge
+      nav - navigator
+      artefact
+      IAUV - IAUV
   )
 
   (:init
@@ -18,12 +21,18 @@
       (location loc3)
       (location loc4)
       (onBridge)
-      (where cap bob)
+      (in cap bob)
+      (in nav bob)
+      (artefact artefact)
+      (at artefact loc3)
+      (deploy IAUV loc3)
+      
   )
 
   (:goal
       (and
         (subLocation loc1)
+        (picture artefact loc3)
       )
   )
 )
