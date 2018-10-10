@@ -4,6 +4,7 @@
   (:objects
       loc1
       loc2
+      artefact
       capt - captain
       nav - navigator
       bridge - bridge
@@ -13,22 +14,27 @@
   )
 
   (:init
-      (subLocation loc2)
-      (location loc1)
+      (subLocation loc1)
+      (location loc2)
+      (artefact artefact)
       
       (area capt bridge)
       (area nav launchbay)
       (area MAUV launchbay)
       (area IAUV launchbay)
+      (not(takePic))
       
       (connected bridge launchbay)
       (connected launchbay bridge)
+      
+      (artefactLocation artefact loc1)
   )
 
   (:goal
       (and
-        (subLocation loc1)
-        (area IAUV loc2)
+        (subLocation loc2)
+        (takePic)
+        (area IAUV launchbay)
       )
   )
 )
