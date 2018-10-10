@@ -2,37 +2,33 @@
   (:domain submarine)
 
   (:objects
-      dock
       loc1
       loc2
-      loc3
-      loc4
-      cap - captain
-      bob - bridge
+      capt - captain
       nav - navigator
-      artefact
+      bridge - bridge
+      launchbay - launchbay
       IAUV - IAUV
+      MAUV - MAUV
   )
 
   (:init
-      (subLocation dock)
+      (subLocation loc2)
       (location loc1)
-      (location loc2)
-      (location loc3)
-      (location loc4)
-      (onBridge)
-      (in cap bob)
-      (in nav bob)
-      (artefact artefact)
-      (at artefact loc3)
-      (deploy IAUV loc3)
       
+      (area capt bridge)
+      (area nav launchbay)
+      (area MAUV launchbay)
+      (area IAUV launchbay)
+      
+      (connected bridge launchbay)
+      (connected launchbay bridge)
   )
 
   (:goal
       (and
         (subLocation loc1)
-        (picture artefact loc3)
+        (area IAUV loc2)
       )
   )
 )
