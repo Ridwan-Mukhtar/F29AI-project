@@ -11,11 +11,15 @@
     )
 
     (:predicates
-        (area ?c ?r)
-        (connected ?room1 ?room2)
         (location ?l)
         (subLocation ?sL)
+        (artefact ?a)
+        (area ?c ?r)
+        (artefactLocation ?a ?l)
+        (connected ?room1 ?room2)
         (immobile)
+        (takePic)
+        (pickArtefact)
     )
     
     (:action moveSub
@@ -63,16 +67,16 @@
     
     (:action sendUAV
         :parameters
-        (?AUV ?location)
+        (?launchbay - launchbay ?AUV ?location)
         
         :precondition
         (and
             (subLocation ?location)
             (exists
-                (?IAUV - IAUV ?MAUV - MAUV ?launchbay - launchbay)
+                (?IAUV - IAUV ?MAUV - MAUV)
                 (and
-                    (or(area ?IAUV launchbay)
-                    (area ?MAUV launchbay))
+                    (or(area ?IAUV ?launchbay)
+                    (area ?MAUV ?launchbay))
                 )
             )
         )
@@ -80,6 +84,46 @@
         :effect
         (and
             (area ?AUV ?location)
+            (not(area ?AUV ?launchbay))
+        )
+    )
+    
+    (:action pickupUAV
+        :parameters
+        (?launchbay - launchbay ?AUV ?location)
+        
+        :precondition
+        (and
+            (area ?AUV ?location)
+            (subLocation ?location)
+        )
+        
+        :effect
+        (and
+            (area ?AUV ?launchbay)
+            (not(area ?AUV ?location))
+        )
+    )
+    
+    (:action picture
+        :parameters
+        (?AUV ?location ?artefact)
+        
+        :precondition
+        (and
+            (location ?location)
+            (artefact ?artefact)
+            (exists
+                (?IAUV - IAUV?)
+                (and
+                    (area ?IAUV ?location)
+                )
+            )
+        )
+        
+        :effect
+        (and
+            (takePic)
         )
     )
 )
