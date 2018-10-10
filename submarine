@@ -5,71 +5,81 @@
     )
 
     (:types 
-        captain 
-        navigator
-        bridge
-        IAUV
-        MAUV
+        captain navigator
+        bridge launchbay
+        IAUV MAUV
     )
 
     (:predicates
-        (artefact ?a)
-        (subLocation ?sL)
+        (area ?c ?r)
+        (connected ?room1 ?room2)
         (location ?l)
-        (in ?c - object ?r - bridge)
-        (at ?a ?l)
-        (deploy ?auv - IAUV ?l)
-        (onBridge)
-        (picture ?a ?l)
+        (subLocation ?sL)
+        (immobile)
     )
     
-    (:action nextArea
+    (:action moveSub
         :parameters
-            (?sL ?l)
+        (?current ?destination)
+        
         :precondition
-            (and
-                (subLocation ?sL)
-                (location ?l)
-                (exists 
-                    (?captain - captain ?bridge - bridge ?navigator - navigator) 
-                        (and
-                            (in ?captain ?bridge)
-                            (in ?navigator ?bridge)
-                        )
-                    )
-                (onBridge)
+        (and
+            (subLocation ?current)
+            (location ?destination)
+            (not(immobile))
+            (exists 
+                (?captain - captain ?bridge - bridge ?navigator - navigator) 
+                (and
+                    (area ?captain ?bridge)
+                    (area ?navigator ?bridge)
+                )
             )
+        )
+        
         :effect
-            (and
-                (when (not(onBridge))
-                            (and
-                              (onBridge)
-                          )
-                    )
-                (not (subLocation ?sL))
-                (subLocation ?l)
-                (location ?sL)
-            )
+        (and
+            (subLocation ?destination)
+            (not(subLocation ?current))
+            
+        )
     )
     
-    (:action getArtefact
-        :parameters
-            (?sL ?a)
+    (:action moveRoom
+        :parameters 
+        (?person ?room ?current)
+        
         :precondition
-            (and
-                (subLocation ?sL)
-                (artefact ?a)
-                (at ?a ?sl)
-                (exists 
-                    (?auv - IAUV) 
-                        (and
-                            (deploy ?auv ?sl)
-                        )
-                    )
-            )
+        (and
+            (area ?person ?current)
+            (connected ?current ?room)
+        )
+        
         :effect
-            (and
-                (picture ?a ?sl)
+        (and
+            (area ?person ?room)
+            (not(area ?person ?current))
+        )
+    )
+    
+    (:action sendUAV
+        :parameters
+        (?AUV ?location)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (exists
+                (?IAUV - IAUV ?MAUV - MAUV ?launchbay - launchbay)
+                (and
+                    (or(area ?IAUV launchbay)
+                    (area ?MAUV launchbay))
+                )
             )
+        )
+        
+        :effect
+        (and
+            (area ?AUV ?location)
+        )
     )
 )
