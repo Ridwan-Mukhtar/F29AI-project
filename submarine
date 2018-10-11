@@ -44,6 +44,7 @@
         (and
             (subLocation ?destination)
             (not(subLocation ?current))
+            (location ?current)
             
         )
     )
@@ -107,18 +108,15 @@
     
     (:action picture
         :parameters
-        (?AUV ?location ?artefact)
+        (?auv - IAUV ?location ?artefact)
         
         :precondition
         (and
             (location ?location)
             (artefact ?artefact)
-            (exists
-                (?IAUV - IAUV?)
-                (and
-                    (area ?IAUV ?location)
-                )
-            )
+            
+            (area ?auv ?location)
+            (artefactLocation ?artefact ?location)
         )
         
         :effect
