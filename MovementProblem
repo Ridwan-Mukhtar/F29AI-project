@@ -7,6 +7,7 @@
       artefact
       capt - captain
       nav - navigator
+      eng - engineer
       bridge - bridge
       launchbay - launchbay
       IAUV - IAUV
@@ -18,16 +19,19 @@
       (location loc2)
       (artefact artefact)
       
+      (area eng bridge)
       (area capt bridge)
       (area nav launchbay)
       (area MAUV launchbay)
       (area IAUV launchbay)
+      
       (not(takePic))
+      (not(pickArtefact))
       
       (connected bridge launchbay)
       (connected launchbay bridge)
       
-      (artefactLocation artefact loc1)
+      (area artefact loc2)
   )
 
   (:goal
@@ -35,6 +39,8 @@
         (subLocation loc2)
         (takePic)
         (area IAUV launchbay)
+        (pickArtefact)
+        (area MAUV launchbay)
       )
   )
 )
