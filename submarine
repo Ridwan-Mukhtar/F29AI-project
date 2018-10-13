@@ -5,7 +5,8 @@
     )
 
     (:types 
-        captain navigator
+        rooms
+        captain navigator engineer
         bridge launchbay
         IAUV MAUV
     )
@@ -13,9 +14,9 @@
     (:predicates
         (location ?l)
         (subLocation ?sL)
+        (squid ?s ?l)
         (artefact ?a)
         (area ?c ?r)
-        (artefactLocation ?a ?l)
         (connected ?room1 ?room2)
         (immobile)
         (takePic)
@@ -74,10 +75,11 @@
         (and
             (subLocation ?location)
             (exists
-                (?IAUV - IAUV ?MAUV - MAUV)
+                (?IAUV - IAUV ?MAUV - MAUV ?engineer - engineer)
                 (and
                     (or(area ?IAUV ?launchbay)
                     (area ?MAUV ?launchbay))
+                    (area ?engineer ?launchbay)
                 )
             )
         )
@@ -97,6 +99,13 @@
         (and
             (area ?AUV ?location)
             (subLocation ?location)
+            
+            (exists
+                (?engineer - engineer)
+                (and
+                    (area ?engineer ?launchbay)
+                )
+            )
         )
         
         :effect
@@ -112,16 +121,37 @@
         
         :precondition
         (and
-            (location ?location)
+            (subLocation ?location)
             (artefact ?artefact)
             
             (area ?auv ?location)
-            (artefactLocation ?artefact ?location)
+            (area ?artefact ?location)
         )
         
         :effect
         (and
             (takePic)
+        )
+    )
+    
+    (:action grabArtefact
+        :parameters
+        (?auv - MAUV ?launchbay - launchbay ?location ?artefact)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (artefact ?artefact)
+            
+            (area ?auv ?location)
+            (area ?artefact ?location)
+        )
+        
+        :effect
+        (and
+            (pickArtefact)
+            (not(area ?artefact ?location))
+            
         )
     )
 )
