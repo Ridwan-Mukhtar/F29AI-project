@@ -1,0 +1,42 @@
+(define (problem simpleMovement)
+  (:domain submarine)
+
+  (:objects
+      loc1
+      loc2
+      artefact
+      captain navigator engineer - crew
+      bridge launchbay - rooms
+      IAUV MAUV - auv
+  )
+
+  (:init
+      (subLocation loc1)
+      (location loc2)
+      (artefact artefact)
+      
+      (area engineer bridge)
+      (area captain bridge)
+      (area navigator launchbay)
+      (area MAUV launchbay)
+      (area IAUV launchbay)
+      
+      (not(takePic))
+      (not(pickArtefact))
+      
+      (connected bridge launchbay)
+      (connected launchbay bridge)
+      
+      (area artefact loc2)
+  )
+
+  (:goal
+      (and
+        (subLocation loc2)
+        (takePic)
+        (area IAUV launchbay)
+        (pickArtefact)
+        (area MAUV launchbay)
+      )
+  )
+)
