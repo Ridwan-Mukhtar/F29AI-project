@@ -1,0 +1,143 @@
+(define (domain submarine)
+    (:requirements
+        :strips
+        :typing
+    )
+
+    (:types
+        crew
+        rooms
+        auv
+    )
+
+    (:predicates
+        (location ?l)
+        (subLocation ?sL)
+        (squid ?s ?l)
+        (artefact ?a)
+        (area ?c ?r)
+        (connected ?room1 ?room2)
+        (immobile)
+        (takePic)
+        (pickArtefact)
+    )
+    
+    (:action moveSub
+        :parameters
+        (?current ?destination)
+        
+        :precondition
+        (and
+            (subLocation ?current)
+            (location ?destination)
+            (not(immobile))
+            
+            (and
+                (area captain bridge)
+                (area navigator bridge)
+            )
+        )
+        
+        :effect
+        (and
+            (subLocation ?destination)
+            (not(subLocation ?current))
+            (location ?current)
+            
+        )
+    )
+    
+    (:action moveRoom
+        :parameters 
+        (?person - crew ?room - rooms ?current - rooms)
+        
+        :precondition
+        (and
+            (area ?person ?current)
+            (connected ?current ?room)
+        )
+        
+        :effect
+        (and
+            (area ?person ?room)
+            (not(area ?person ?current))
+        )
+    )
+    
+    (:action sendUAV
+        :parameters
+        (?AUV - auv ?location)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+                
+            (or(area IAUV launchbay)(area MAUV launchbay))
+            (area engineer launchbay)
+        )
+        
+        :effect
+        (and
+            (area ?AUV ?location)
+            (not(area ?AUV launchbay))
+        )
+    )
+    
+    (:action pickupUAV
+        :parameters
+        (?AUV - auv ?location)
+        
+        :precondition
+        (and
+            (area ?AUV ?location)
+            (subLocation ?location)
+            (area engineer launchbay)
+        )
+        
+        :effect
+        (and
+            (area ?AUV launchbay)
+            (not(area ?AUV ?location))
+        )
+    )
+    
+    (:action picture
+        :parameters
+        (?location ?artefact)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (artefact ?artefact)
+            
+            (area iauv ?location)
+            (area ?artefact ?location)
+        )
+        
+        :effect
+        (and
+            (takePic)
+        )
+    )
+    
+    (:action grabArtefact
+        :parameters
+        (?location ?artefact)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (artefact ?artefact)
+            
+            (area mauv ?location)
+            (area ?artefact ?location)
+        )
+        
+        :effect
+        (and
+            (pickArtefact)
+            (not(area ?artefact ?location))
+            
+        )
+    )
+)
