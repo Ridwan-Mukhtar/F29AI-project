@@ -3,23 +3,27 @@
         :strips
         :typing
     )
+    
+    ;TO DO LIST THAT I SKIPPED
+    ;TRANSFER PIC TO DATABASE
 
     (:types
         crew
         rooms
         auv
+        squids
     )
 
     (:predicates
         (location ?l)
         (subLocation ?sL)
-        (squid ?s ?l)
         (artefact ?a)
-        (area ?c ?r)
+        (area ?object ?area)
         (connected ?room1 ?room2)
         (immobile)
         (takePic)
         (pickArtefact)
+        (electrified)
     )
     
     (:action moveSub
@@ -31,19 +35,16 @@
             (subLocation ?current)
             (location ?destination)
             (not(immobile))
-            
-            (and
-                (area captain bridge)
-                (area navigator bridge)
-            )
+            (area captain bridge)
+            (area navigator bridge)
         )
         
         :effect
         (and
             (subLocation ?destination)
+            (not(location ?destination))
             (not(subLocation ?current))
             (location ?current)
-            
         )
     )
     
@@ -55,7 +56,7 @@
         (and
             (area ?person ?current)
             (connected ?current ?room)
-        )
+        )   
         
         :effect
         (and
@@ -71,7 +72,6 @@
         :precondition
         (and
             (subLocation ?location)
-                
             (or(area IAUV launchbay)(area MAUV launchbay))
             (area engineer launchbay)
         )
@@ -137,7 +137,58 @@
         (and
             (pickArtefact)
             (not(area ?artefact ?location))
+            (area ?artefact mauv)
             
+        )
+    )
+    
+    (:action transferArtefact
+        :parameters
+        (?artefact)
+        
+        :precondition
+        (and
+            (artefact ?artefact)
+            (area ?artefact mauv)
+            (pickArtefact)
+        )
+        
+        :effect
+        (and
+            (not(area ?artefact mauv))
+            (area ?artefact launchbay)
+            (not(pickArtefact))
+        )
+    )
+    
+    (:action electrocute
+        :parameters
+        (?squid - squids ?subLocation)
+        
+        :precondition
+        (and
+            (subLocation ?subLocation)
+            (area ?squid ?subLocation)
+        )
+        
+        :effect
+        (electrified)
+    )
+    
+    (:action squidGrab
+        :parameters
+        (?squid - squids ?subLocation)
+        
+        :precondition
+        (and
+            (subLocation ?subLocation)
+            (area ?squid ?subLocation)
+            (not(electrified))
+        )
+        
+        :effect
+        (and
+            (immobile)
         )
     )
 )
