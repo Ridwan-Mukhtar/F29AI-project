@@ -24,6 +24,7 @@
         (takePic)
         (pickArtefact)
         (electrified)
+        (nextToSquid)
     )
     
     (:action moveSub
@@ -45,6 +46,9 @@
             (not(location ?destination))
             (not(subLocation ?current))
             (location ?current)
+            
+            (when (area squid ?destination) (nextToSquid))
+            (When (not(area squid ?destination)) (not(nextToSquid)))
         )
     )
     
@@ -162,13 +166,9 @@
     )
     
     (:action electrocute
-        :parameters
-        (?squid - squids ?subLocation)
-        
         :precondition
         (and
-            (subLocation ?subLocation)
-            (area ?squid ?subLocation)
+            (nextToSquid)
         )
         
         :effect
@@ -176,13 +176,9 @@
     )
     
     (:action squidGrab
-        :parameters
-        (?squid - squids ?subLocation)
-        
         :precondition
         (and
-            (subLocation ?subLocation)
-            (area ?squid ?subLocation)
+            (nextToSquid)
             (not(electrified))
         )
         
