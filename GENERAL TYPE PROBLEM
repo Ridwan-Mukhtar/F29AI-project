@@ -24,12 +24,13 @@
       (area navigator launchbay)
       (area MAUV launchbay)
       (area IAUV launchbay)
-      (area artefact loc2)
+      (area artefact loc3)
       
       (not(immobile))
       (not(takePic))
       (not(pickArtefact))
       (not(electrified))
+      (not(nextToSquid))
       
       (connected bridge launchbay)
       (connected launchbay bridge)
@@ -37,7 +38,8 @@
 
   (:goal
       (and
-        (electrified)
+        (subLocation loc3)
+        (area artefact launchbay)
       )
   )
 )
