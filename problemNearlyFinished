@@ -1,0 +1,54 @@
+(define (problem simpleMovement)
+  (:domain submarine)
+
+  (:objects
+      surface seaPort atlantis
+      artefact
+      captain navigator engineer scientist communicationOfficer - crew
+      bridge launchbay sciencelab engineering - rooms
+      IAUV MAUV - auv
+      squid1 squid2 - squids
+  )
+
+  (:init
+      (subLocation seaPort)
+      (location surface)
+      (location atlantis)
+      (artefact artefact)
+      
+      (area squid1 surface)
+      (area squid2 atlantis)
+      (area engineer bridge)
+      (area captain bridge)
+      (area navigator launchbay)
+      (area communicationOfficer sciencelab)
+      (area scientist sciencelab)
+      (area MAUV launchbay)
+      (area IAUV launchbay)
+      (area artefact atlantis)
+      
+      (not(immobile))
+      (not(takePic artefact))
+      (not(pickArtefact))
+      (not(electrified))
+      (not(squidEncounter))
+      (not(destroyAUV IAUV))
+      (not(destroyAUV MAUV))
+      (not(squidElectrocute))
+      (not(report artefact))
+      
+      (connected bridge launchbay)
+      (connected launchbay bridge)
+      (connected engineering launchbay)
+      (connected launchbay engineering)
+      (connected sciencelab launchbay)
+      (connected launchbay sciencelab)
+  )
+
+  (:goal
+      (and
+        (area artefact seaPort)
+        (subLocation seaPort)
+      )
+  )
+)
