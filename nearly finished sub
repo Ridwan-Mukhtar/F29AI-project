@@ -1,0 +1,276 @@
+(define (domain submarine)
+    (:requirements
+        :strips
+        :typing
+    )
+    
+    ;TO DO LIST THAT I SKIPPED
+    ;TRANSFER PIC TO DATABASE
+
+    (:types
+        crew
+        rooms
+        auv
+        squids
+    )
+
+    (:predicates
+        (location ?l)
+        (subLocation ?sL)
+        (artefact ?a)
+        (area ?object ?area)
+        (connected ?room1 ?room2)
+        (immobile)
+        (takePic ?pic)
+        (pickArtefact)
+        (electrified)
+        (squidEncounter)
+        (squidElectrocute)
+        (destroyAUV ?auv)
+        (report ?artefact)
+    )
+    
+    (:action moveSub
+        :parameters
+        (?current ?destination)
+        
+        :precondition
+        (and
+            (subLocation ?current)
+            (location ?destination)
+            (not(immobile))
+            (area captain bridge)
+            (area navigator bridge)
+        )
+        
+        :effect
+        (and
+            (subLocation ?destination)
+            (not(location ?destination))
+            (not(subLocation ?current))
+            (location ?current)
+            
+            (when (exists (?squid - squids) (and(area ?squid ?destination))) (squidEncounter))
+        )
+    )
+    
+    (:action moveRoom
+        :parameters 
+        (?person - crew ?room - rooms ?current - rooms)
+        
+        :precondition
+        (and
+            (area ?person ?current)
+            (connected ?current ?room)
+        )   
+        
+        :effect
+        (and
+            (area ?person ?room)
+            (not(area ?person ?current))
+        )
+    )
+    
+    (:action sendUAV
+        :parameters
+        (?AUV - auv ?location)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (or(area IAUV launchbay)(area MAUV launchbay))
+            (area engineer launchbay)
+            (not(destroyAUV ?AUV))
+        )
+        
+        :effect
+        (and
+            (area ?AUV ?location)
+            (not(area ?AUV launchbay))
+            (when (squidEncounter) (destroyAUV ?AUV))
+        )
+    )
+    
+    (:action pickupUAV
+        :parameters
+        (?AUV - auv ?location)
+        
+        :precondition   
+        (and
+            (subLocation ?location)
+            (area ?AUV ?location)
+            (area engineer launchbay)
+            (not(destroyAUV ?AUV))
+        )
+        
+        :effect
+        (and
+            (area ?AUV launchbay)
+            (not(area ?AUV ?location))
+        )
+    )
+    
+    (:action picture
+        :parameters
+        (?location ?artefact)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (artefact ?artefact)
+            (not(destroyAUV iauv))
+            (area iauv ?location)
+            (area ?artefact ?location)
+        )
+        
+        :effect
+        (and
+            (takePic ?artefact)
+        )
+    )
+    
+    (:action grabArtefact
+        :parameters
+        (?location ?artefact)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (artefact ?artefact)
+            (not(destroyAUV mauv))
+            (area mauv ?location)
+            (area ?artefact ?location)
+        )
+        
+        :effect
+        (and
+            (pickArtefact)
+            (not(area ?artefact ?location))
+            (area ?artefact mauv)
+            
+        )
+    )
+    
+    (:action transferArtefact
+        :parameters
+        (?artefact)
+        
+        :precondition
+        (and
+            (artefact ?artefact)
+            (area ?artefact mauv)
+            (area mauv launchbay)
+            (pickArtefact)
+            (not(destroyAUV mauv))
+        )
+        
+        :effect
+        (and
+            (not(area ?artefact mauv))
+            (area ?artefact launchbay)
+            (not(pickArtefact))
+        )
+    )
+    
+    (:action electrocute
+        :parameters
+        (?squid - squids ?subLocation)
+        
+        :precondition
+        (and
+            (subLocation ?subLocation)
+            (squidElectrocute)
+            (not(electrified))
+            (area engineer engineering)
+        )
+        
+        :effect
+        (and
+            (electrified)
+            (not(area ?squid ?subLocation))
+            (not(immobile))
+            (not(squidElectrocute))
+            (not(squidEncounter))
+        )
+    )
+    
+    (:action squidGrab
+        :precondition
+        (and
+            (squidEncounter)
+        )
+        
+        :effect
+        (and
+            (immobile)
+            (squidElectrocute)
+        )
+    )
+    
+    (:action recharge
+        :precondition
+        (and
+            (electrified)
+            (area engineer engineering)
+        )
+            
+        :effect
+        (and
+            (not(electrified))
+        )
+    )
+    
+    (:action scienceGrabArtefact
+        :parameters
+        (?artefact)
+        
+        :precondition
+        (and
+            (artefact ?artefact)
+            (area ?artefact launchbay)
+            (area scientist launchbay)
+        )
+        
+        :effect
+        (and
+            (not(area ?artefact launchbay))
+            (area ?artefact scientist)
+        )
+    )
+    
+    (:action examineArtefact
+        :parameters 
+        (?artefact)
+        
+        :precondition
+        (and
+            (artefact ?artefact)
+            (area ?artefact scientist)
+            (area scientist sciencelab)
+        )
+        
+        :effect
+        (and
+            (area ?artefact sciencelab)
+            (report ?artefact)
+            (not (area ?artefact scientist))
+        )
+    )
+    
+    (:action sendData
+        :parameters
+        (?object)
+        
+        :precondition
+        (and
+            (or(report ?object)(takePic ?object))
+            (subLocation surface)
+            (area communicationOfficer bridge)
+        )
+        
+        :effect
+        (and
+            (area ?object seaPort)
+        )
+    )
+)
