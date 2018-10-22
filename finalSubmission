@@ -1,63 +1,424 @@
-(define (problem simpleMovement)
-  (:domain submarine)
+(define (domain submarine)
+    (:requirements
+        :strips
+        :typing
+    )
+    
+    ;TO DO LIST THAT I SKIPPED
+    ;TRANSFER PIC TO DATABASE
 
-  (:objects
-      surface seaPort atlantis underwatertown memoryunit
-      artefact artefact2
-      captain navigator engineer scientist communicationOfficer - crew
-      bridge launchbay sciencelab engineering - rooms
-      IAUV MAUV - auv
-      squid1 squid2 - squids
-  )
+    (:types
+        crew
+        rooms
+        auv
+        squids
+    )
 
-  (:init
-      (subLocation surface)
-      (location seaPort)
-      (location atlantis)
-      (location underwatertown)
-      (artefact artefact)
-      (artefact artefact2)
-      (not(dive))
-      (resurface)
-      (not(resetDive))
-      
-      (area squid1 underwatertown)
-      (area squid2 atlantis)
-      (area engineer engineering)
-      (area captain bridge)
-      (area navigator bridge)
-      (area communicationOfficer bridge)
-      (area scientist launchbay)
-      (area MAUV launchbay)
-      (area IAUV launchbay)
-      (area artefact atlantis)
-      (area artefact2 underwatertown)
-      
-      (not(deployed))
-      (not(immobile))
-      (not(takePic artefact))
-      (not(electrified))
-      (not(squidEncounter))
-      (not(destroyAUV IAUV))
-      (not(destroyAUV MAUV))
-      (not(squidElectrocute))
-      (not(report artefact))
-      
-      (connected bridge launchbay)
-      (connected launchbay bridge)
-      (connected engineering launchbay)
-      (connected launchbay engineering)
-      (connected sciencelab launchbay)
-      (connected launchbay sciencelab)
-      (connected launchbay memoryunit)
-  )
-
-  (:goal
-      (and
-        (subLocation underwatertown)
-        (area artefact seaPort)
-        (report artefact2)
-        (area artefact2 seaPort)
-      )
-  )
-)
+    (:predicates
+        (location ?l)
+        (subLocation ?sL)
+        (artefact ?a)
+        (area ?object ?area)
+        (connected ?room1 ?room2)
+        (immobile)
+        (electrified)
+        (squidEncounter)
+        (squidElectrocute)
+        (destroyAUV ?auv)
+        (report ?artefact)
+        (takePic ?artefact)
+        (dive)
+        (resurface)
+        (resetDive)
+        (deployed)
+    )
+    
+    (:action moveSub
+        :parameters
+        (?current ?destination)
+        
+        :precondition
+        (and
+            ;these preconditions are here to meet the specification
+            ;1. captain and navigator is on the bridge
+            ;2. can only move once dived
+            ;3. not immobile
+            (subLocation ?current)
+            (location ?destination)
+            
+            (not(immobile))
+            (area captain bridge)
+            (area navigator bridge)
+            
+            (dive)
+            (not(resurface))
+            (not(resetDive))
+        )
+        
+        :effect
+        (and
+            ;we simple switch the subLocation into a location and change a location into the sublocation
+            (subLocation ?destination)
+            (not(location ?destination))
+            (not(subLocation ?current))
+            (location ?current)
+            
+            ;we use this variable to force the program to dive
+            (resetDive)
+            
+            ;check if the squid exists
+            (when 
+                (exists (?squid - squids) 
+                    ;if so we wat to check it's area
+                    (and (area ?squid ?destination))
+                ) 
+                ;force a squidencounter and make the sub immobile (unnable to move) so it can't escape
+                (and (squidEncounter)(immobile))
+            )
+        )
+    )
+    
+    (:action moveRoom
+        :parameters 
+        (?person - crew ?room - rooms ?current - rooms)
+        
+        :precondition
+        (and
+            ;checking if the person is in a room room and that the room he/she is in is connected to the destination room
+            (area ?person ?current)
+            (connected ?current ?room)
+        )   
+        
+        :effect
+        (and
+            ;if it is connected, we change the area to the destination room and remove the person from the previous room
+            (area ?person ?room)
+            (not(area ?person ?current))
+        )
+    )
+    
+    (:action sendUAV
+        :parameters
+        (?AUV - auv ?location)
+        
+        :precondition
+        (and
+            ;have to make sure the sub is at the specified location before sending an auv
+            (subLocation ?location)
+            
+            ;make sure the engineer and IAUV or an MAUV all reside in the launchbay
+            (or(area IAUV launchbay)(area MAUV launchbay))
+            (area engineer launchbay)
+            
+            ;make sure that the AUV isn't destroyed
+            (not(destroyAUV ?AUV))
+            (not(deployed))
+        )
+        
+        :effect
+        (and
+            ;move the AUV into the location and remove it from the launchbay
+            (area ?AUV ?location)
+            (not(area ?AUV launchbay))
+            
+            ;IF WE DO NOT ELECTROCUTE THE SQUID THEN THE AUV IS DESTROYED BECAUSE (squidEncounter) IS TRUE!
+            (when (squidEncounter) 
+                (destroyAUV ?AUV)
+            )
+            
+            (deployed)
+        )
+    )
+    
+    (:action pickupUAV
+        :parameters
+        (?AUV - auv ?location)
+        
+        :precondition   
+        (and
+            (subLocation ?location)
+            
+            (area ?AUV ?location)
+            (area engineer launchbay)
+            
+            ;makes sure that the auv isn't destroyed
+            (not(destroyAUV ?AUV))
+            (deployed)
+        )
+        
+        :effect
+        (and
+            ;moves auv from the location back into the launchbay
+            (area ?AUV launchbay)
+            (not(area ?AUV ?location))
+            (not(deployed))
+        )
+    )
+    
+    (:action picture
+        :parameters
+        (?location ?artefact)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (artefact ?artefact)
+            
+            ;makes sure that the iauv isn't destroyed
+            (not(destroyAUV iauv))
+            
+            ;checks if the iauv is next to the artefact
+            (area iauv ?location)
+            (area ?artefact ?location)
+        )
+        
+        :effect
+        (and
+            ;takes a picture of the artefact and leaves it untouched
+            (takePic ?artefact)
+        )
+    )
+    
+    (:action transferPictureToMemoryUnit
+        :parameters
+        (?artefact)
+        
+        :precondition
+        (and
+            ;make sure that the iau is in the launchbay
+            (area iauv launchbay)
+            
+            (takePic ?artefact)
+        )
+        
+        :effect
+        (and
+            ;moves the artefact picture to the memoryunit
+            (area ?artefact memoryunit)
+        )
+    )
+    
+    (:action grabArtefact
+        :parameters
+        (?location ?artefact)
+        
+        :precondition
+        (and
+            (subLocation ?location)
+            (artefact ?artefact)
+            
+            ;checks that the mauv isn't destroyed
+            (not(destroyAUV mauv))
+            
+            ;makes sure the mauv is in the same location as the artefact
+            (area mauv ?location)
+            (area ?artefact ?location)
+        )
+        
+        :effect
+        (and
+            ;moves the artefact from the location onto the mauv
+            (not(area ?artefact ?location))
+            (area ?artefact mauv)
+            
+        )
+    )
+    
+    (:action transferArtefact
+        :parameters
+        (?artefact)
+        
+        :precondition
+        (and
+            ;checks that the artefact is on the mauv and that the mauv is in the launchbay
+            ;so that we can logically place the artefact into the launchbay
+            (artefact ?artefact)
+            (area ?artefact mauv)
+            (area mauv launchbay)
+        )
+        
+        :effect
+        (and
+            ;removes the artefact from the mauv and puts it into the launchbay
+            (not(area ?artefact mauv))
+            (area ?artefact launchbay)
+        )
+    )
+    
+    (:action electrocute
+        :parameters
+        (?squid - squids ?subLocation)
+        
+        :precondition
+        (and
+            ;checks if the squidElectrocute process has been started
+            ;checks that the sub has not electrified before (needs to recharge if it has)
+            ;checks that the engineer can start the electrification process from engineering
+            (subLocation ?subLocation)
+            
+            (squidElectrocute)
+            (not(electrified))
+            
+            (area engineer engineering)
+        )
+        
+        :effect
+        (and
+            ;remove squid from the location, electrified so we need to recharge (using the recharge action),
+            ;sub is no longer immobile and we can reset the squid encounters and squidelectrocute cal.
+            (not(area ?squid ?subLocation))
+            (not(immobile))
+            
+            (electrified)
+            (not(squidElectrocute))
+            (not(squidEncounter))
+        )
+    )
+    
+    (:action squidGrab
+        :precondition
+        (and
+            ;once we move the sub, a squidEncounter occurs if a squid is at that location
+            (squidEncounter)
+        )
+        
+        :effect
+        (and
+            ;make the sub immobile and start electrification process
+            (immobile)
+            (squidElectrocute)
+        )
+    )
+    
+    (:action recharge
+        :precondition
+        (and
+            ;gets the engineer to recharge the batteries
+            (electrified)
+            (area engineer engineering)
+        )
+            
+        :effect
+        (and
+            ;can electrocute a squid now
+            (not(electrified))
+        )
+    )
+    
+    (:action scienceGrabArtefact
+        :parameters
+        (?artefact)
+        
+        :precondition
+        (and
+            ;makes sure that the artefact is in the correct place
+            ;also makes sure that the scientist is in the launchbay with the artefact there too
+            (artefact ?artefact)
+            (area ?artefact launchbay)
+            (area scientist launchbay)
+        )
+        
+        :effect
+        (and
+            ;scientist grabs the artefact
+            (not(area ?artefact launchbay))
+            (area ?artefact scientist)
+        )
+    )
+    
+    (:action examineArtefact
+        :parameters 
+        (?artefact)
+        
+        :precondition
+        (and
+            ;makes sure that the artefact is on the scientist as he is the only one who can move it
+            (artefact ?artefact)
+            (area ?artefact scientist)
+            (area scientist sciencelab)
+        )
+        
+        :effect
+        (and
+            ;put the artefact into the sciencelab and creates a report on the artefact
+            (area ?artefact sciencelab)
+            (report ?artefact)
+            (not (area ?artefact scientist))
+        )
+    )
+    
+    (:action sendData
+        :parameters
+        (?object)
+        
+        :precondition
+        (and
+            ;checks if the object is a picture or a report
+            (or(and(report ?object)) (and (area ?object memoryunit)(takePic ?object)))
+            
+            ;makes sure the sub is above the surface
+            (resurface)
+            
+            ;checks if the communicationOfficer is on the bridge so we can send the data
+            (area communicationOfficer bridge)
+        )
+        
+        :effect
+        (and
+            ;sends the artefact picture or report to the seaPort
+            (area ?object seaPort)
+        )
+    )
+    
+    (:action diving
+        :precondition
+        (and
+            ;ensure the sub is surfaced
+            (subLocation surface)
+            
+            (not(dive))
+            (resurface)
+            (not(immobile))
+        )
+        
+        :effect
+        (and
+            ;set the predactes to allow for resurfacing when appropriate
+            (dive)
+            (not(resurface))
+        )
+    )
+    
+    (:action resurfacing
+        :parameters
+        (?whereIsTheSub)
+        :precondition
+        (and
+            ;just want to make sure that the sub isn't at the surface
+            (subLocation ?whereIsTheSub)
+            (location surface)
+            
+            ;make sure the predicates are set in a way that shows it's dived
+            (resetDive)
+            (dive)
+            (not(resurface))
+            
+            ;making sure the sub is mobile before moving (otherwise the AI will manage to move the sub to the surface whilst immobile)
+            (not(immobile))
+        )
+        
+        :effect
+        (and
+            ;force the sub to go to the surface once done with it's task in X location
+            (not(subLocation ?whereIsTheSub))
+            (location ?whereIsTheSub)
+            (subLocation surface)
+            (not(location surface))
+            
+            ;reset the predactes to enable another dive
+            (not(dive))
+            (resurface)
+            (not(resetDive))
+        )
+    )
+)  
