@@ -33,16 +33,6 @@
       (area artefact atlantis)
       (area artefact2 underwatertown)
       
-      (not(deployed))
-      (not(immobile))
-      (not(takePic artefact))
-      (not(electrified))
-      (not(squidEncounter))
-      (not(destroyAUV IAUV))
-      (not(destroyAUV MAUV))
-      (not(squidElectrocute))
-      (not(report artefact))
-      
       (connected bridge launchbay)
       (connected launchbay bridge)
       (connected engineering launchbay)
@@ -55,6 +45,7 @@
   (:goal
       (and
         (subLocation underwatertown)
+        (report artefact)
         (area artefact seaPort)
         (report artefact2)
         (area artefact2 seaPort)
