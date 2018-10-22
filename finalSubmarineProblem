@@ -1,4 +1,4 @@
-(define (problem simpleMovement)
+(define (problem mainProblem)
   (:domain submarine)
 
   (:objects
@@ -11,19 +11,20 @@
   )
 
   (:init
-      (subLocation surface)
-      (location seaPort)
+      (subLocation seaPort)
+      (location surface)
       (location atlantis)
       (location underwatertown)
       (artefact artefact)
       (artefact artefact2)
-      (not(dive))
-      (resurface)
-      (not(resetDive))
+      (dive)
+      (not(resurface))
+      (resetDive)
       
+      ;sets the area of all the predicates that require a location of some sort
       (area squid1 underwatertown)
       (area squid2 atlantis)
-      (area engineer engineering)
+      (area engineer launchbay)
       (area captain bridge)
       (area navigator bridge)
       (area communicationOfficer bridge)
@@ -33,6 +34,8 @@
       (area artefact atlantis)
       (area artefact2 underwatertown)
       
+      ;connects the room
+      ;can switch this about and connect it anyway you want 
       (connected bridge launchbay)
       (connected launchbay bridge)
       (connected engineering launchbay)
@@ -44,10 +47,7 @@
 
   (:goal
       (and
-        (subLocation underwatertown)
-        (report artefact)
         (area artefact seaPort)
-        (report artefact2)
         (area artefact2 seaPort)
       )
   )
